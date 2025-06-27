@@ -2,14 +2,26 @@
 const searchForm = document.getElementById('search-form');
 const movieResults = document.getElementById('movie-results');
 
- 
- 
+// Get reference to the watchlist container
+const watchlistContainer = document.getElementById('watchlist');
+
+// Load watchlist from localStorage or start with an empty array
+let watchlist = [];
+const savedWatchlist = localStorage.getItem('watchlist');
+if (savedWatchlist) {
+  watchlist = JSON.parse(savedWatchlist);
+}
+
+// Your OMDb API key (replace 'YOUR_API_KEY' with your actual key)
+const API_KEY = '663b96d8'; // Example API key, replace with your own
+
+// Function to save the watchlist to localStorage
+function saveWatchlist() {
+  localStorage.setItem('watchlist', JSON.stringify(watchlist));
+}
 
 // This function fetches movies from the OMDb API using a search query
 const fetchMovies = async (query) => {
-  // Your OMDb API key (replace 'YOUR_API_KEY' with your actual key)
-  const API_KEY = '663b96d8'; // Example API key, replace with your own
-
   // Build the OMDb API URL using the query parameter
   // Use encodeURIComponent to safely encode the search query
   const url = `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${API_KEY}`;
@@ -22,6 +34,40 @@ const fetchMovies = async (query) => {
 
   // Return the data to use later
   return data;
+}
+
+// Function to render the watchlist section
+function renderWatchlist() {
+  // If the watchlist is empty, show a message
+  if (watchlist.length === 0) {
+    watchlistContainer.innerHTML = 'Your watchlist is empty. Search for movies to add!';
+    return;
+  }
+
+  // Otherwise, show the movies in the watchlist
+  watchlistContainer.innerHTML = '';
+  watchlist.forEach(movie => {
+    // Create a card for each movie in the watchlist
+    const movieCard = document.createElement('div');
+    movieCard.className = 'movie-card';
+
+    // Check if the movie has a poster image
+    const poster = movie.Poster !== 'N/A'
+      ? movie.Poster
+      : 'https://via.placeholder.com/250x350?text=No+Image';
+
+    // Add the movie's poster, title, and year to the movie card
+    movieCard.innerHTML = `
+      <img class="movie-poster" src="${poster}" alt="Poster of ${movie.Title}">
+      <div class="movie-info">
+        <div class="movie-title">${movie.Title}</div>
+        <div class="movie-year">${movie.Year}</div>
+      </div>
+    `;
+
+    // Add the movie card to the watchlist container
+    watchlistContainer.appendChild(movieCard);
+  });
 }
 
 // Listen for the form submit event
@@ -71,13 +117,29 @@ searchForm.addEventListener('submit', async function(event) {
           <div class="movie-title">${movie.Title}</div>
           <div class="movie-year">${movie.Year}</div>
         </div>
+        <button class="add-watchlist-btn">Add to Watchlist</button>
       `;
 
       // 6. Add the movie card to the results container on the page
       movieResults.appendChild(movieCard);
+
+      // 7. Add event listener for the "Add to Watchlist" button
+      const addBtn = movieCard.querySelector('.add-watchlist-btn');
+      addBtn.addEventListener('click', function() {
+        // Check if the movie is already in the watchlist (by imdbID)
+        const exists = watchlist.some(item => item.imdbID === movie.imdbID);
+        if (!exists) {
+          watchlist.push(movie);
+          saveWatchlist(); // Save to localStorage
+          renderWatchlist();
+        }
+      });
     });
   } else {
     // If no movies found, show a message
     movieResults.innerHTML = `<div class="no-results">No movies found. Try another search!</div>`;
   }
 });
+
+// Render the watchlist on page load
+renderWatchlist();
