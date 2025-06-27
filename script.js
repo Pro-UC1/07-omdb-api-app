@@ -2,8 +2,27 @@
 const searchForm = document.getElementById('search-form');
 const movieResults = document.getElementById('movie-results');
 
-// Your OMDb API key (replace 'YOUR_API_KEY' with your actual key)
-const API_KEY = 'YOUR_API_KEY';
+ 
+ 
+
+// This function fetches movies from the OMDb API using a search query
+const fetchMovies = async (query) => {
+  // Your OMDb API key (replace 'YOUR_API_KEY' with your actual key)
+  const API_KEY = '663b96d8'; // Example API key, replace with your own
+
+  // Build the OMDb API URL using the query parameter
+  // Use encodeURIComponent to safely encode the search query
+  const url = `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${API_KEY}`;
+
+  // Fetch data from the OMDb API
+  const response = await fetch(url);
+
+  // Convert the response to JSON format
+  const data = await response.json();
+
+  // Return the data to use later
+  return data;
+}
 
 // Listen for the form submit event
 searchForm.addEventListener('submit', async function(event) {
@@ -20,18 +39,14 @@ searchForm.addEventListener('submit', async function(event) {
     return;
   }
 
-  // Build the OMDb API URL
-  const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(searchTerm)}`;
-
-  // Fetch data from the OMDb API
-  const response = await fetch(url);
-  const data = await response.json();
+  // Fetch movies using the fetchMovies function
+  const data = await fetchMovies(searchTerm);
 
   // Clear previous results
   movieResults.innerHTML = '';
 
-  // Check if movies were found
-  if (data.Response === 'True') {
+  // Check if the API response contains the 'Search' property (movies found)
+  if (data.Search) {
     // data.Search is an array of movie objects returned from the API
 
     // 1. Get the array of movies from the API response
