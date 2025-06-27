@@ -32,16 +32,24 @@ searchForm.addEventListener('submit', async function(event) {
 
   // Check if movies were found
   if (data.Response === 'True') {
-    // Loop through each movie and display its poster, title, and year
-    data.Search.forEach(movie => {
-      // Create a div for the movie card
+    // data.Search is an array of movie objects returned from the API
+
+    // 1. Get the array of movies from the API response
+    const moviesArray = data.Search;
+
+    // 2. Go through each movie in the array, one by one
+    moviesArray.forEach(movie => {
+      // 3. For each movie, create a new div element for the movie card
       const movieCard = document.createElement('div');
       movieCard.className = 'movie-card';
 
-      // Use a placeholder image if poster is not available
-      const poster = movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/250x350?text=No+Image';
+      // 4. Check if the movie has a poster image
+      // If not, use a placeholder image
+      const poster = movie.Poster !== 'N/A' 
+        ? movie.Poster 
+        : 'https://via.placeholder.com/250x350?text=No+Image';
 
-      // Set the inner HTML of the movie card
+      // 5. Add the movie's poster, title, and year to the movie card
       movieCard.innerHTML = `
         <img class="movie-poster" src="${poster}" alt="Poster of ${movie.Title}">
         <div class="movie-info">
@@ -50,7 +58,7 @@ searchForm.addEventListener('submit', async function(event) {
         </div>
       `;
 
-      // Add the movie card to the results grid
+      // 6. Add the movie card to the results container on the page
       movieResults.appendChild(movieCard);
     });
   } else {
