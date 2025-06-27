@@ -2,13 +2,14 @@
 const searchForm = document.getElementById('search-form');
 const movieResults = document.getElementById('movie-results');
 
-// Get reference to the watchlist container
+// Get reference to the watchlist container in the HTML
 const watchlistContainer = document.getElementById('watchlist');
 
-// Load watchlist from localStorage or start with an empty array
+// Load the watchlist from localStorage if it exists, or start with an empty array
 let watchlist = [];
 const savedWatchlist = localStorage.getItem('watchlist');
 if (savedWatchlist) {
+  // If there is a saved watchlist, use it
   watchlist = JSON.parse(savedWatchlist);
 }
 
@@ -17,6 +18,7 @@ const API_KEY = '663b96d8'; // Example API key, replace with your own
 
 // Function to save the watchlist to localStorage
 function saveWatchlist() {
+  // Convert the watchlist array to a string and save it
   localStorage.setItem('watchlist', JSON.stringify(watchlist));
 }
 
@@ -36,7 +38,7 @@ const fetchMovies = async (query) => {
   return data;
 }
 
-// Function to render the watchlist section
+// Function to show the watchlist on the page
 function renderWatchlist() {
   // If the watchlist is empty, show a message
   if (watchlist.length === 0) {
@@ -51,22 +53,32 @@ function renderWatchlist() {
     const movieCard = document.createElement('div');
     movieCard.className = 'movie-card';
 
-    // Check if the movie has a poster image
+    // Use the movie's poster, or a placeholder if not available
     const poster = movie.Poster !== 'N/A'
       ? movie.Poster
       : 'https://via.placeholder.com/250x350?text=No+Image';
 
-    // Add the movie's poster, title, and year to the movie card
+    // Add the movie's poster, title, year, and a remove button to the card
     movieCard.innerHTML = `
       <img class="movie-poster" src="${poster}" alt="Poster of ${movie.Title}">
       <div class="movie-info">
         <div class="movie-title">${movie.Title}</div>
         <div class="movie-year">${movie.Year}</div>
       </div>
+      <button class="remove-watchlist-btn">Remove</button>
     `;
 
-    // Add the movie card to the watchlist container
+    // Add the card to the watchlist section
     watchlistContainer.appendChild(movieCard);
+
+    // Add event listener for the "Remove" button
+    const removeBtn = movieCard.querySelector('.remove-watchlist-btn');
+    removeBtn.addEventListener('click', function() {
+      // Remove the movie from the watchlist array by imdbID
+      watchlist = watchlist.filter(item => item.imdbID !== movie.imdbID);
+      saveWatchlist(); // Save the updated watchlist
+      renderWatchlist(); // Update the display
+    });
   });
 }
 
@@ -141,5 +153,11 @@ searchForm.addEventListener('submit', async function(event) {
   }
 });
 
-// Render the watchlist on page load
+// When the user clicks "Add to Watchlist" on a movie card:
+// - Check if the movie is already in the watchlist (no duplicates)
+// - If not, add it to the watchlist array
+// - Save the updated watchlist to localStorage
+// - Show the updated watchlist on the page
+
+// The watchlist is shown when the page loads
 renderWatchlist();
