@@ -81,7 +81,11 @@ function renderWatchlist() {
     });
   });
 }
-
+// Clear the search input field when the form is submitted
+searchForm.addEventListener('submit', function() {
+  const searchInput = document.getElementById('movie-search');
+  searchInput.value = '';
+});
 // Listen for the form submit event
 searchForm.addEventListener('submit', async function(event) {
   // Prevent the page from reloading
